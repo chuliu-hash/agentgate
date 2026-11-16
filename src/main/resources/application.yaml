@@ -1,0 +1,69 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: agentgate
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/agentgate?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:123456}
+    lettuce:
+      pool:
+        max-active: 30
+        max-idle: 15
+        min-idle: 5
+        time-between-eviction-runs: 10s
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:hmdp}
+    password: ${RABBITMQ_PASSWORD:hmdp}
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 5
+        prefetch: 10
+        default-requeue-rejected: false
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  type-aliases-package: com.agentgate.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+agentgate:
+  # AES-256 主密钥：生产必须通过环境变量注入，长度 32 字节
+  secret-key: ${AGENTGATE_SECRET_KEY:AgentGate@2026SecretKey32Bytes!!}
+  openapi:
+    max-body-bytes: 1048576
+    timestamp-window-seconds: 300
+    nonce-ttl-minutes: 5
+    connect-timeout-ms: 3000
+    read-timeout-ms: 5000
+  ssrf:
+    # 本地演示时允许回环地址；生产必须为 false
+    allow-loopback: ${AGENTGATE_SSRF_ALLOW_LOOPBACK:true}
+  security:
+    # 只有部署在可信反向代理之后才开启，否则 X-Forwarded-For 可被伪造绕过 IP 白名单
+    trust-proxy: ${AGENTGATE_TRUST_PROXY:false}
+  admin:
+    username: ${AGENTGATE_ADMIN_USERNAME:admin}
+    password: ${AGENTGATE_ADMIN_PASSWORD:admin123}
+
+logging:
+  level:
+    com.agentgate: debug
+    org.springframework.amqp: info
