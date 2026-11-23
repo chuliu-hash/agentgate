@@ -3,6 +3,11 @@ package com.agentgate.enums;
 import lombok.Getter;
 
 @Getter
+/**
+ * 教学说明：成功、通用 HTTP 风格、签名、上游与业务错误编号及中文信息；异常处理代码另行映射 HTTP 状态。
+ * 文件路径：src/main/java/com/agentgate/enums/ErrorCode.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public enum ErrorCode {
 
     SUCCESS(0, "success"),

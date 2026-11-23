@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AgentGate 控制台</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body>
+<header><div><strong>AgentGate</strong><span class="muted">工具开放平台</span></div><div id="identity">未登录</div></header>
+<main>
+<section id="auth" class="panel"><h1>连接你的工具平台</h1><p class="muted">统一管理应用、API 订阅与调用记录。</p><form id="auth-form"><div class="fields"><label>用户名<input name="username" required autocomplete="username" minlength="3" maxlength="32"></label><label>密码<input name="password" type="password" required autocomplete="current-password"></label><label id="nickname-field" hidden>昵称<input name="nickname" maxlength="32"></label></div><div class="actions"><button type="submit" id="auth-submit">登录</button><button type="button" class="secondary" id="auth-toggle">注册开发者账号</button></div></form></section>
+<section id="workspace" hidden><div class="toolbar"><nav id="nav" aria-label="功能导航"></nav><button id="logout" class="secondary">退出登录</button></div><section class="panel"><div class="section-heading"><div><h1 id="title"></h1><p id="description" class="muted"></p></div><button id="refresh" class="secondary">刷新</button></div><div id="controls"></div><div id="content"></div></section></section>
+<div id="notice" role="status" aria-live="polite"></div>
+<details id="response-panel" class="panel" hidden><summary>调用结果与详情</summary><pre id="response">尚未发送请求</pre></details>
+<footer>AgentGate · 工具开放平台</footer>
+</main>
+<dialog id="editor"><form id="editor-form"><h2 id="editor-title"></h2><div id="editor-fields" class="fields"></div><p id="editor-error" role="alert"></p><div class="actions"><button type="submit">提交</button><button type="button" class="secondary" id="cancel-editor">取消</button></div></form></dialog>
+<dialog id="secret-dialog"><h2>保存应用凭据</h2><p>Secret 只在创建或重置时返回。关闭后不会保存在浏览器中，请妥善保存。</p><pre id="secret-value"></pre><div class="actions"><button id="use-secret">前往在线调用</button><button id="close-secret" class="secondary">关闭</button></div></dialog>
+</body></html>

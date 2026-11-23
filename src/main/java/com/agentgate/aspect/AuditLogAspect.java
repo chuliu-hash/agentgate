@@ -20,7 +20,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 管理端写操作审计：只追加，不影响业务主流程。
+ * 记录带 {@link AuditLog} 的管理操作结果；审计写入失败只记日志，不改变原业务结果。
+ * 参数摘要会序列化后截断长度，但不会自动脱敏，调用方不得把密码或密钥放入被审计参数。
  */
 @Slf4j
 @Aspect
@@ -36,6 +37,7 @@ public class AuditLogAspect {
     @Value("${agentgate.security.trust-proxy:false}")
     private boolean trustProxy;
 
+    /** 执行业务方法并记录成功或失败；业务异常原样抛回调用方。 */
     @Around("@annotation(com.agentgate.annotation.AuditLog)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         AuditLog auditLog = ((MethodSignature) joinPoint.getSignature()).getMethod()
@@ -50,6 +52,7 @@ public class AuditLogAspect {
         }
     }
 
+    /** 从当前请求上下文构造审计记录；第一个数字参数作为资源 ID，写入异常不会影响业务。 */
     private void record(ProceedingJoinPoint joinPoint, AuditLog auditLog,
                         boolean success, String errorMessage) {
         try {
@@ -80,6 +83,7 @@ public class AuditLogAspect {
         }
     }
 
+    /** 序列化参数并截断存储长度；截断不等于脱敏，敏感参数必须在进入切面前排除。 */
     private String buildDetail(Object[] args, boolean success, String errorMessage) {
         StringBuilder detail = new StringBuilder();
         detail.append("success=").append(success);
@@ -87,6 +91,7 @@ public class AuditLogAspect {
             detail.append(", error=").append(errorMessage);
         }
         try {
+            // 保存操作参数以便追溯；参数中不得包含密码或密钥，长度截断不会脱敏。
             String argsJson = objectMapper.writeValueAsString(args);
             detail.append(", args=").append(argsJson);
         } catch (Exception ignored) {
@@ -96,6 +101,9 @@ public class AuditLogAspect {
         return text.length() <= MAX_DETAIL_LENGTH ? text : text.substring(0, MAX_DETAIL_LENGTH);
     }
 
+    /**
+     * 从 Spring 请求上下文取得当前 HTTP 请求，无请求上下文时返回空值。
+     */
     private HttpServletRequest currentRequest() {
         if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes) {
             return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

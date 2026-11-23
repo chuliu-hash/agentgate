@@ -10,6 +10,11 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Data
+/**
+ * 教学说明：API 登记/修改请求，包含 code、方法、上游、敏感级别、版本、超时等约束；合法字段仍需 Service 校验 URL 与唯一性。
+ * 文件路径：src/main/java/com/agentgate/dto/ApiCreateDTO.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class ApiCreateDTO {
 
     @NotBlank(message = "API 编码不能为空")

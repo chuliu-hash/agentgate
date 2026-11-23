@@ -19,15 +19,24 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * 教学说明：从调用日志 Mapper 聚合当日调用量、2xx 成功量、成功率、平均耗时、活跃应用和 Top5 API；appId 为空表示全局。
+ * 文件路径：src/main/java/com/agentgate/service/impl/DashboardServiceImpl.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class DashboardServiceImpl implements DashboardService {
 
     private final CallLogMapper callLogMapper;
     private final ApiDefinitionMapper apiDefinitionMapper;
 
+    /**
+     * 聚合当日调用日志生成看板，appId 为空表示全局；成功按 2xx 统计，异步日志会导致短时滞后。
+     */
     @Override
     public DashboardSummaryDTO summary(Long appId) {
         LocalDateTime start = LocalDate.now().atStartOfDay();
         long todayCalls = callLogMapper.countSince(start, appId);
+        // 教学说明：成功按 HTTP 2xx 统计，不是简单的“没有 Java 异常”；MQ 异步写日志使看板可能短暂滞后。
         long successCalls = callLogMapper.countSuccessSince(start, appId);
         Double avgLatency = callLogMapper.averageLatencySince(start, appId);
 
@@ -43,6 +52,9 @@ public class DashboardServiceImpl implements DashboardService {
         return summary;
     }
 
+    /**
+     * 批量查询热门 API 名称并补充到聚合行，避免每行单独查询数据库。
+     */
     private List<Map<String, Object>> enrichTopApis(List<Map<String, Object>> rows) {
         if (rows == null || rows.isEmpty()) {
             return new ArrayList<>();
@@ -69,6 +81,9 @@ public class DashboardServiceImpl implements DashboardService {
         return result;
     }
 
+    /**
+     * 将数据库返回的 Number 安全转为 Long，非数值返回空值。
+     */
     private Long toLong(Object value) {
         return value instanceof Number ? ((Number) value).longValue() : null;
     }

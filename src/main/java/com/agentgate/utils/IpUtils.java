@@ -3,12 +3,23 @@ package com.agentgate.utils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+/**
+ * 教学说明：取得客户端 IP 并匹配白名单；默认使用远端地址，仅信任代理配置打开时使用转发头；支持精确 IP 与 *，不支持 CIDR。
+ * 文件路径：src/main/java/com/agentgate/utils/IpUtils.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 
 public final class IpUtils {
 
+    /**
+     * 私有构造器禁止直接实例化，仅通过静态方法使用此工具类。
+     */
     private IpUtils() {
     }
 
+    /**
+     * 默认取 TCP 远端地址；显式信任代理时才采用转发头，防止随意伪造白名单来源。
+     */
     public static String getClientIp(HttpServletRequest request) {
         return getClientIp(request, false);
     }
@@ -33,6 +44,9 @@ public final class IpUtils {
         return normalize(request.getRemoteAddr());
     }
 
+    /**
+     * 匹配应用配置的 IP 白名单；支持精确地址与通配符，不支持 CIDR 网段。
+     */
     public static boolean isAllowed(String clientIp, String whitelist) {
         if (!StringUtils.hasText(whitelist)) {
             return true;
@@ -50,6 +64,9 @@ public final class IpUtils {
         return false;
     }
 
+    /**
+     * 规范化客户端地址文本，供后续白名单匹配。
+     */
     private static String normalize(String ip) {
         if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
             return "127.0.0.1";

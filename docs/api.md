@@ -1,5 +1,7 @@
 # AgentGate 接口文档
 
+真实天气 `weather_live` 与汇率 `exchange_rate` 的参数和接入步骤见 [真实 API 接入](public-apis.md)，它们沿用下文开放接口签名规则。
+
 统一响应体：
 
 ```json
@@ -236,9 +238,8 @@ curl "http://127.0.0.1:8081/openapi/weather?city=beijing" \
 6. Nonce 是否首次使用（签名通过后才消费 Nonce）
 7. API 是否存在且已上架
 8. 订阅是否为 ACTIVE
-9. 令牌桶 QPS
-10. 日/月配额
-11. 上游 SSRF 校验与转发
+9. 一次 Lua 原子校验并扣减 QPS 令牌与日/月配额
+10. 上游 SSRF 校验与转发
 
 ### 4.5 错误码
 

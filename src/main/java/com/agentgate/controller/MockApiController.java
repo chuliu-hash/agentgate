@@ -14,8 +14,16 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/mock-api")
+/**
+ * 教学说明：本机模拟上游：weather 返回天气，order/user 返回含敏感字段的演示数据；无登录鉴权，仅用于本地演示，不是真实第三方服务。
+ * 文件路径：src/main/java/com/agentgate/controller/MockApiController.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class MockApiController {
 
+    /**
+     * HTTP 入口：接收请求并返回业务结果。 具体数据操作委托给 Service，登录与角色校验由请求拦截器执行。
+     */
     @GetMapping("/weather")
     public Map<String, Object> weather(@RequestParam(defaultValue = "beijing") String city) {
         Map<String, Object> data = new LinkedHashMap<>();
@@ -27,6 +35,9 @@ public class MockApiController {
         return data;
     }
 
+    /**
+     * HTTP 入口：接收请求并返回业务结果。 具体数据操作委托给 Service，登录与角色校验由请求拦截器执行。
+     */
     @GetMapping("/order/{id}")
     public Map<String, Object> order(@PathVariable String id) {
         Map<String, Object> data = new LinkedHashMap<>();
@@ -39,6 +50,9 @@ public class MockApiController {
         return data;
     }
 
+    /**
+     * HTTP 入口：接收请求并返回业务结果。 具体数据操作委托给 Service，登录与角色校验由请求拦截器执行。
+     */
     @GetMapping("/user/{id}")
     public Map<String, Object> user(@PathVariable String id) {
         Map<String, Object> data = new LinkedHashMap<>();

@@ -1,5 +1,7 @@
 # AgentGate — 智能体工具开放平台
 
+> 演示前端位于 `nginx/html/`，通过独立 Nginx 代理访问后端，无需 npm 构建。启动方法与演示流程见 [前后端分离演示说明](docs/frontend-demo.md)；后端入门见 [学习导航](docs/learning-guide.md)。
+
 AgentGate 是一个面向智能体/业务应用的 **工具（Open API）开放平台**：平台方把内部或第三方 HTTP 工具注册为开放 API，开发者创建应用并获得 AK/SK；应用申请订阅并通过审批后，使用签名调用 `/openapi/**`，平台统一完成身份认证、权限校验、限流配额、上游转发、敏感数据脱敏和调用审计。
 
 它和作者的另一个项目「智能体安全护栏」形成互补：
@@ -178,9 +180,9 @@ signature = Hex(HMAC-SHA256(canonical, appSecret))
 
 ### 5.3 限流与配额
 
-- QPS：Redis Lua 令牌桶，key `ratelimit:{appId}:{apiId}`，原子补充与扣减。
-- 日/月配额：Redis Lua 读取用量、比较上限、`INCR` 并首次设置过期，原子执行。
-- 超限统一返回 HTTP 429。
+- QPS 与日/月配额：同一次 Lua 原子完成令牌桶补充/扣减与日/月计数检查/双增，拒绝时不做任何写入。
+- key 分别为 `ratelimit:{appId}:{apiId}`、`quota:day:{appId}:{apiId}:{yyyyMMdd}`、`quota:month:{appId}:{apiId}:{yyyyMM}`。
+- 超限统一返回 HTTP 429；QPS 用 code 429，配额用 code 4290。
 
 ### 5.4 缓存
 
@@ -236,7 +238,7 @@ signature = Hex(HMAC-SHA256(canonical, appSecret))
 
 - 基于 Spring Boot + MyBatis-Plus + MySQL + Redis + RabbitMQ 实现智能体工具开放平台，覆盖应用接入、API 注册/订阅、配额限流、签名鉴权、调用审计与运营看板。
 - 设计 AK/SK + HMAC-SHA256 + 时间戳 + Nonce 防重放机制，AppSecret 使用 AES-256-GCM 加密存储，结合 IP 白名单与 SSRF 防护保障工具调用边界。
-- 使用 Redis Lua 实现令牌桶限流与日/月配额原子扣减，避免并发超发；使用 Cache Aside + 空值缓存 + Redisson 互斥重建解决缓存穿透/击穿。
+- 使用 Redis Lua 将令牌桶限流与日/月配额合并为单脚本原子扣减，避免并发超发与“令牌已扣但配额不足”的空耗；使用 Cache Aside + 空值缓存 + Redisson 互斥重建解决缓存穿透/击穿。
 - 基于 RabbitMQ 异步落库调用日志，手动 ACK + 死信 + `trace_id` 唯一索引幂等，MQ 不可用时同步兜底，保证日志链路可靠。
 - 使用拦截器 + ThreadLocal 实现登录态与角色鉴权，AOP 记录管理端操作审计，响应按敏感级别自动脱敏。
 
@@ -246,11 +248,11 @@ signature = Hex(HMAC-SHA256(canonical, appSecret))
 2. canonical string 为什么包含 body hash、timestamp、nonce；如何防重放。
 3. Secret 为什么可逆加密而不是哈希；密钥管理与重置后的缓存一致性。
 4. 固定窗口、滑动窗口、令牌桶的取舍；为什么用 Redis Lua。
-5. QPS 与日/月配额的区别；为什么限流与配额都必须原子。
+5. QPS 与日/月配额的区别；为什么把两者合并进同一个 Lua 并让拒绝路径零写入。
 6. Cache Aside 的删除时机、空值缓存、互斥重建、随机 TTL。
 7. RabbitMQ 手动 ACK、死信、消费幂等、发送失败兜底。
 8. 条件 UPDATE + 唯一索引兜底，为什么不能只靠 Redis 判断。
 9. SSRF 的完整攻击面：私网、云元数据、重定向、DNS 重绑定。
 10. 与护栏项目组合成“模型输入输出 + 工具调用边界”的智能体安全闭环。
 
-更多细节见 [docs/design.md](docs/design.md)、[docs/api.md](docs/api.md)、[docs/demo.md](docs/demo.md)。
+更多细节见 [docs/design.md](docs/design.md)、[docs/api.md](docs/api.md)、[docs/frontend-demo.md](docs/frontend-demo.md)。

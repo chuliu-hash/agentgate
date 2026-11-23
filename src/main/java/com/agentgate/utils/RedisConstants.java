@@ -1,7 +1,15 @@
 package com.agentgate.utils;
+/**
+ * 教学说明：集中管理登录、Nonce、鉴权缓存、订阅缓存及锁 key 前缀和有效期；改前缀会影响已有缓存与登录态。
+ * 文件路径：src/main/java/com/agentgate/utils/RedisConstants.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 
 public final class RedisConstants {
 
+    /**
+     * 私有构造器禁止直接实例化，仅通过静态方法使用此工具类。
+     */
     private RedisConstants() {
     }
 

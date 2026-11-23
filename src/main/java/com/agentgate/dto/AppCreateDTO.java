@@ -6,6 +6,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Data
+/**
+ * 教学说明：应用创建输入：名称和 IP 白名单，字段校验约束见源码；所有者从当前登录上下文取得，不能由客户端指定。
+ * 文件路径：src/main/java/com/agentgate/dto/AppCreateDTO.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class AppCreateDTO {
 
     @NotBlank(message = "应用名称不能为空")

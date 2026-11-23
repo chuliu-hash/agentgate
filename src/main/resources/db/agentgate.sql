@@ -1,6 +1,8 @@
 -- AgentGate 建库建表脚本（MySQL 8.0）
 -- 管理员、套餐、演示 API 由应用启动时的 DataInitializer 幂等补齐。
 
+SET NAMES utf8mb4;
+
 CREATE DATABASE IF NOT EXISTS agentgate
     DEFAULT CHARACTER SET utf8mb4
     COLLATE utf8mb4_general_ci;

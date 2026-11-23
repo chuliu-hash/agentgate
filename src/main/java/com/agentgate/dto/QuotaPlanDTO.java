@@ -8,6 +8,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
+/**
+ * 教学说明：套餐名称、QPS、日/月配额和说明，NotNull/Min 保证计数上限为正，名称长度受约束。
+ * 文件路径：src/main/java/com/agentgate/dto/QuotaPlanDTO.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class QuotaPlanDTO {
 
     @NotBlank(message = "套餐名称不能为空")

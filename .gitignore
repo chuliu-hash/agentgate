@@ -1,4 +1,5 @@
 target/
+nginx/temp/
 logs/
 *.log
 
@@ -16,5 +17,6 @@ Thumbs.db
 
 # 本地环境变量与密钥，不要提交
 .env
+docker-compose.override.yml
 application-local.yaml
 application-local.yml

@@ -21,10 +21,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/subscriptions")
 @RequiredArgsConstructor
+/**
+ * 教学说明：管理员订阅列表及审批入口；传 PENDING 时查待审批，其他值走全部列表；ApproveDTO 表达同意与拒绝原因。
+ * 文件路径：src/main/java/com/agentgate/controller/AdminSubscriptionController.java
+ * 阅读建议：先看字段和入口方法，再沿调用链阅读异常分支与数据访问。
+ */
 public class AdminSubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
+    /**
+     * HTTP 入口：接收请求并返回业务结果。 具体数据操作委托给 Service，登录与角色校验由请求拦截器执行。
+     */
     @GetMapping
     public Result<List<Subscription>> list(
             @RequestParam(required = false) String status) {
@@ -34,6 +42,9 @@ public class AdminSubscriptionController {
         return Result.ok(subscriptionService.listAll());
     }
 
+    /**
+     * HTTP 入口：审批待审订阅，按结果转为 ACTIVE 或 REJECTED；更新条件包含旧状态 PENDING，未命中时拒绝覆盖并发修改。 具体数据操作委托给 Service，登录与角色校验由请求拦截器执行。
+     */
     @PostMapping("/{id}/approve")
     @AuditLog(action = "APPROVE_SUBSCRIPTION", resourceType = "SUBSCRIPTION")
     public Result<Void> approve(@PathVariable Long id,
